@@ -9,15 +9,10 @@ export const appPost = async (url: string, params: object) => {
     headers: HEADERS,
     body: JSON.stringify({ ...params }),
   });
-  const response = await res.json();
-  return response;
-};
-
-export const appPatch = async (url: string, params: object) => {
-  let res = await fetch(`${base}${url}`, {
-    method: "PATCH",
-    body: JSON.stringify({ ...params }),
-  });
+  if (await checkRes(res)) {
+    const response = await res.json();
+    return response;
+  }
   const response = await res.json();
   return response;
 };
@@ -36,6 +31,20 @@ export const appGet = async (url: string, params: object | null = null) => {
     method: "GET",
     headers: HEADERS,
   });
+  if (await checkRes(res)) {
+    const response = await res.json();
+    return response;
+  }
   const response = await res.json();
   return response;
+};
+
+const checkRes = async (res: any) => {
+  if (!res.ok) {
+    let text = await res.json();
+    text = text.message;
+    if (!text) text = res.statusText;
+    throw new Error(text);
+  }
+  return true;
 };
